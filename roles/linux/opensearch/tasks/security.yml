@@ -11,6 +11,18 @@
   become: false
   when: iac_enable
 
+- name: Security Plugin configuration | Create LDAP directory for certificate
+  ansible.builtin.file:
+    path: "{{ os_sec_plugin_ldap_path }}"
+    state: directory
+  register: remote_configuration
+
+- name: Security Plugin configuration | Copy LDAP certificate
+  ansible.builtin.copy:
+    src: "{{ ldap.tls.ca_cert_path }}"
+    dest: "{{ os_sec_plugin_ldap_cert }}"
+    mode: '0400'
+
 - name: Security Plugin configuration | Create local temporary directory for certificates generation
   local_action:
     module: file
@@ -26,13 +38,13 @@
     url: https://search.maven.org/remotecontent?filepath=com/floragunn/search-guard-tlstool/1.5/search-guard-tlstool-1.5.tar.gz
     dest: /tmp/opensearch-nodecerts/search-guard-tlstool.tar.gz
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false
 
 - name: Security Plugin configuration | Extract the certificates generation tool
   local_action: command chdir=/tmp/opensearch-nodecerts tar -xvf search-guard-tlstool.tar.gz
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false
 
 - name: Security Plugin configuration | Make the executable file
@@ -41,7 +53,7 @@
     dest: /tmp/opensearch-nodecerts/tools/sgtlstool.sh
     mode: a+x
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false
 
 - name: Security Plugin configuration | Prepare the certificates generation template file
@@ -50,14 +62,14 @@
     src: tlsconfig.yml
     dest: /tmp/opensearch-nodecerts/config/tlsconfig.yml
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false
 
 - name: Security Plugin configuration | Generate the node & admin certificates in local
   local_action:
     module: command /tmp/opensearch-nodecerts/tools/sgtlstool.sh -c /tmp/opensearch-nodecerts/config/tlsconfig.yml -ca -crt -t /tmp/opensearch-nodecerts/config/
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false
 
 - name: Security Plugin configuration | IaC enabled - Check certificate
@@ -126,7 +138,7 @@
     - "{{ inventory_hostname }}_http.pem"
     - admin.key
     - admin.pem
-  when: (configuration.changed and not iac_enable) or (iac_enable and force_update_cert_nodes_count | int > 0)
+  when: (configuration.changed or remote_configuration.changed and not iac_enable) or (iac_enable and force_update_cert_nodes_count | int > 0)
 
 - name: Security Plugin configuration | Copy the security configuration file 1 to cluster
   ansible.builtin.blockinfile:
@@ -135,7 +147,7 @@
     backup: true
     insertafter: EOF
     marker: "## {mark} OpenSearch Security common configuration ##"
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Copy the security configuration file 2 to cluster
   ansible.builtin.blockinfile:
@@ -144,7 +156,7 @@
     backup: true
     insertafter: EOF
     marker: "## {mark} opensearch Security Node & Admin certificates configuration ##"
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Create security plugin configuration folder
   ansible.builtin.file:
@@ -153,7 +165,7 @@
     group: "{{ os_user }}"
     mode: 0700
     state: directory
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Copy the security configuration file 3 to cluster
   ansible.builtin.template:
@@ -168,7 +180,7 @@
 
 - name: Security Plugin configuration | Prepare the opensearch security configuration file
   ansible.builtin.command: sed -i 's/searchguard/plugins.security/g' {{ os_conf_dir }}/opensearch.yml
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Set the file ownerships
   ansible.builtin.file:
@@ -204,7 +216,7 @@
     dest: "{{ os_sec_plugin_conf_path }}/internal_users.yml"
     mode: 0644
   run_once: true
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Copy custom configuration files to cluster
   ansible.builtin.template:
@@ -225,7 +237,7 @@
   environment:
     JAVA_HOME: "{{ os_home }}/jdk"
   run_once: true
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Set the kibanaserver user pasword
   ansible.builtin.shell: >
@@ -234,7 +246,7 @@
   environment:
     JAVA_HOME: "{{ os_home }}/jdk"
   run_once: true
-  when: configuration.changed or iac_enable
+  when: configuration.changed or remote_configuration.changed or iac_enable
 
 - name: Security Plugin configuration | Check that the files/internal_users.yml exists
   ansible.builtin.stat:
@@ -274,7 +286,7 @@
       environment:
         JAVA_HOME: "{{ os_home }}/jdk"
       run_once: true
-      when: configuration.changed or copy_custom_security_configs
+      when: configuration.changed or remote_configuration.changed or copy_custom_security_configs
       with_items: "{{ custom_users_filtered }}"
 
 - name: Security Plugin configuration | Initialize the opensearch security index in opensearch with custom configs
@@ -289,7 +301,7 @@
   environment:
     JAVA_HOME: "{{ os_home }}/jdk"
   run_once: true
-  when: configuration.changed and copy_custom_security_configs
+  when: configuration.changed or remote_configuration.changed and copy_custom_security_configs
 
 - name: Security Plugin configuration | Initialize the opensearch security index in opensearch with default configs
   ansible.builtin.shell: >
@@ -303,7 +315,7 @@
   environment:
     JAVA_HOME: "{{ os_home }}/jdk"
   run_once: true
-  when: configuration.changed and not copy_custom_security_configs
+  when: configuration.changed or remote_configuration.changed and not copy_custom_security_configs
 
 - name: Security Plugin configuration | Cleanup local temporary directory
   local_action:
@@ -311,5 +323,5 @@
     path: /tmp/opensearch-nodecerts
     state: absent
   run_once: true
-  when: configuration.changed
+  when: configuration.changed or remote_configuration.changed
   become: false

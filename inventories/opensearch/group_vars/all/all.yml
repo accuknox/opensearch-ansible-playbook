@@ -7,11 +7,11 @@ os_download_url: https://artifacts.opensearch.org/releases/bundle/opensearch
 
 # opensearch version
 # 2.x Latest Version
-os_version: "2.15.0"
+os_version: "2.18.0"
 
 # opensearch dashboards version
 # 2.x Latest Version
-os_dashboards_version: "2.15.0"
+os_dashboards_version: "2.18.0"
 
 # Configure hostnames for opensearch nodes
 # It is required to configure SSL
@@ -56,7 +56,7 @@ oidc:
   client_secret: "00000000-0000-0000-0000-000000000000"
 
 # Overwrite demo configurations with your own
-copy_custom_security_configs: false
+copy_custom_security_configs: true
 
 # To override demo configurations, you can use your own configuration files.
 # Place them in the "files" directory. Specify the path to the files
@@ -91,4 +91,19 @@ custom_security_plugin_configs:
 # execution (previously, the settings were updated only if the
 # /tmp/opensearch-nodecerts directory was missing on the server from which the
 # playbook was launched and new certificates were generated)
-iac_enable: false
+iac_enable: true
+
+
+ldap:
+  enabled: true
+  hosts:
+  - "dc01.ak.lan:636"
+  tls:
+    enabled: true
+    ca_cert_path: /root/ca.pem #local path
+    verify_hostnames: true
+  bind_dn: CN=Administrator,CN=Users,DC=ak,DC=lan #null
+  bind_password: Password123! #null
+  role_query: CN=Users,DC=ak,DC=lan #'ou=groups,dc=example,dc=com'
+  user_query: CN=Users,DC=ak,DC=lan #'ou=people,dc=example,dc=com'
+  verify_hostnames: false

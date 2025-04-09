@@ -189,8 +189,14 @@ config:
           type: noop
       ldap:
         description: "Authenticate via LDAP or Active Directory"
+        {% if ldap.enabled -%}
+        http_enabled: true
+        transport_enabled: true
+        {% else -%}
         http_enabled: false
         transport_enabled: false
+        {%- endif %}
+
         order: 5
         http_authenticator:
           type: basic
@@ -200,23 +206,38 @@ config:
           type: ldap
           config:
             # enable ldaps
+            {% if ldap.tls.enabled -%}
+            enable_ssl: true
+            {% else -%}
             enable_ssl: false
+            {%- endif %}
+
             # enable start tls, enable_ssl should be false
             enable_start_tls: false
             # send client certificate
             enable_ssl_client_auth: false
+
             # verify ldap hostname
+            {% if ldap.tls.verify_hostnames -%}
             verify_hostnames: true
-            hosts:
-            - localhost:8389
-            bind_dn: null
-            password: null
-            userbase: 'ou=people,dc=example,dc=com'
+            {% else -%}
+            verify_hostnames: false
+            {%- endif %}
+
+            {% if ldap.tls.ca_cert_path -%}
+            pemtrustedcas_filepath: {{ os_sec_plugin_ldap_cert }}
+            {%- endif %}
+
+            hosts: {{ ldap.hosts }}
+            bind_dn: {{ ldap.bind_dn }}
+            password: {{ ldap.bind_password }}
+            userbase: {{ ldap.user_query }}
             # Filter to search for users (currently in the whole subtree beneath userbase)
             # {0} is substituted with the username
             usersearch: '(sAMAccountName={0})'
             # Use this attribute from the user as username (if not set then DN is used)
-            username_attribute: null
+            #username_attribute: null
+            username_attribute: sAMAccountName
     authz:
       roles_from_myldap:
         description: "Authorize via LDAP or Active Directory"
@@ -227,37 +248,54 @@ config:
           type: ldap
           config:
             # enable ldaps
+            {% if ldap.tls.enabled -%}
+            enable_ssl: true
+            {% else -%}
             enable_ssl: false
+            {%- endif %}
+
             # enable start tls, enable_ssl should be false
             enable_start_tls: false
             # send client certificate
             enable_ssl_client_auth: false
             # verify ldap hostname
+
+            # verify ldap hostname
+            {% if ldap.tls.verify_hostnames -%}
             verify_hostnames: true
-            hosts:
-            - localhost:8389
-            bind_dn: null
-            password: null
-            rolebase: 'ou=groups,dc=example,dc=com'
+            {% else -%}
+            verify_hostnames: false
+            {%- endif %}
+
+            {% if ldap.tls.ca_cert_path -%}
+            pemtrustedcas_filepath: {{ os_sec_plugin_ldap_cert }}
+            {%- endif %}
+
+            hosts: {{ ldap.hosts }}
+            bind_dn: {{ ldap.bind_dn }}
+            password: {{ ldap.bind_password }}
+            rolebase: {{ ldap.role_query }}
             # Filter to search for roles (currently in the whole subtree beneath rolebase)
             # {0} is substituted with the DN of the user
             # {1} is substituted with the username
             # {2} is substituted with an attribute value from user's directory entry, of the authenticated user. Use userroleattribute to specify the name of the attribute
-            rolesearch: '(member={0})'
+            rolesearch: (member={1})
             # Specify the name of the attribute which value should be substituted with {2} above
-            userroleattribute: null
+            #userroleattribute: sAMAccountName
+            usernameattribute: sAMAccountName
             # Roles as an attribute of the user entry
-            userrolename: disabled
-            #userrolename: memberOf
+            #userrolename: disabled
+            userrolename: memberOf
             # The attribute in a role entry containing the name of that role, Default is "name".
             # Can also be "dn" to use the full DN as rolename.
-            rolename: cn
+            rolename: CN
             # Resolve nested roles transitive (roles which are members of other roles and so on ...)
-            resolve_nested_roles: true
-            userbase: 'ou=people,dc=example,dc=com'
+            resolve_nested_roles: false
+            userbase: {{ ldap.user_query }}
             # Filter to search for users (currently in the whole subtree beneath userbase)
             # {0} is substituted with the username
-            usersearch: '(uid={0})'
+            #usersearch: '(uid={0})'
+            usersearch: (sAMAccountName={0})
             # Skip users matching a user name, a wildcard or a regex pattern
             #skip_users:
             #  - 'cn=Michael Jackson,ou*people,o=TEST'

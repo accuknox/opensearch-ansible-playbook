@@ -22,6 +22,7 @@ all_access:
   backend_roles:
   - "admin"
   - "opensearch_admin"
+  - "os-access"
   description: "Maps admin to all_access"
 # ----------------------------------------------------
 indexes_full_access:

@@ -1,24 +1,24 @@
-os1 ansible_host=10.0.1.1  ansible_user=root ip=10.0.1.1 roles=data,master
-os2 ansible_host=10.0.1.2  ansible_user=root ip=10.0.1.2 roles=data,master
-os3 ansible_host=10.0.1.3  ansible_user=root ip=10.0.1.3 roles=data,master
-os4 ansible_host=10.0.1.4  ansible_user=root ip=10.0.1.4 roles=data,ingest
-os5 ansible_host=10.0.1.5  ansible_user=root ip=10.0.1.5 roles=data,ingest
+accusiem1 ansible_host=10.100.0.124  ansible_user=ubuntu ip=10.100.0.124 roles=data,master
+#accusiem2 ansible_host=10.0.1.2  ansible_user=root ip=10.0.1.2 roles=data,master
+#accusiem3 ansible_host=10.0.1.3  ansible_user=root ip=10.0.1.3 roles=data,master
+#accusiem4 ansible_host=10.0.1.4  ansible_user=root ip=10.0.1.4 roles=data,ingest
+#accusiem5 ansible_host=10.0.1.5  ansible_user=root ip=10.0.1.5 roles=data,ingest
 
-dashboards1 ansible_host=10.0.1.6  ansible_user=root ip=10.0.1.6
+accusiem-dashboards1 ansible_host=10.100.0.124  ansible_user=ubuntu ip=10.100.0.124
 
 # List all the nodes in the os cluster
 [os-cluster]
-os1
-os2
-os3
-os4
-os5
+accusiem1
+#accusiem2
+#accusiem3
+#accusiem4
+#accusiem5
 
 # List all the Master eligible nodes under this group
 [master]
-os1
-os2
-os3
+accusiem1
+#accusiem2
+#accusiem3
 
 [dashboards]
-dashboards1
+accusiem-dashboards1
