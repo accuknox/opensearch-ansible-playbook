@@ -241,8 +241,14 @@ config:
     authz:
       roles_from_myldap:
         description: "Authorize via LDAP or Active Directory"
+        {% if ldap.enabled -%}
+        http_enabled: true
+        transport_enabled: true
+        {% else -%}
         http_enabled: false
         transport_enabled: false
+        {%- endif %}
+
         authorization_backend:
           # LDAP authorization backend (gather roles from a LDAP or Active Directory, you have to configure the above LDAP authentication backend settings too)
           type: ldap
@@ -274,32 +280,11 @@ config:
             hosts: {{ ldap.hosts }}
             bind_dn: {{ ldap.bind_dn }}
             password: {{ ldap.bind_password }}
+            rolesearch: '(member={0})'
+            resolve_nested_roles: true
             rolebase: {{ ldap.role_query }}
-            # Filter to search for roles (currently in the whole subtree beneath rolebase)
-            # {0} is substituted with the DN of the user
-            # {1} is substituted with the username
-            # {2} is substituted with an attribute value from user's directory entry, of the authenticated user. Use userroleattribute to specify the name of the attribute
-            rolesearch: (member={1})
-            # Specify the name of the attribute which value should be substituted with {2} above
-            #userroleattribute: sAMAccountName
-            usernameattribute: sAMAccountName
-            # Roles as an attribute of the user entry
-            #userrolename: disabled
-            userrolename: memberOf
-            # The attribute in a role entry containing the name of that role, Default is "name".
-            # Can also be "dn" to use the full DN as rolename.
             rolename: CN
-            # Resolve nested roles transitive (roles which are members of other roles and so on ...)
-            resolve_nested_roles: false
-            userbase: {{ ldap.user_query }}
-            # Filter to search for users (currently in the whole subtree beneath userbase)
-            # {0} is substituted with the username
-            #usersearch: '(uid={0})'
-            usersearch: (sAMAccountName={0})
-            # Skip users matching a user name, a wildcard or a regex pattern
-            #skip_users:
-            #  - 'cn=Michael Jackson,ou*people,o=TEST'
-            #  - '/\S*/'
+
       roles_from_another_ldap:
         description: "Authorize via another Active Directory"
         http_enabled: false

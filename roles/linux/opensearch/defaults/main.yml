@@ -19,6 +19,7 @@ os_sec_plugin_conf_path: /usr/share/opensearch/config/opensearch-security
 os_sec_plugin_tools_path: /usr/share/opensearch/plugins/opensearch-security/tools
 os_sec_plugin_ldap_path: "{{ os_sec_plugin_conf_path }}/ldap"
 os_sec_plugin_ldap_cert: "{{ os_sec_plugin_ldap_path }}/ldap.pem"
+os_data_path: "{{ data.path }}/{{ inventory_hostname }}/"
 os_api_port: 9200
 
 systemctl_path: /etc/systemd/system

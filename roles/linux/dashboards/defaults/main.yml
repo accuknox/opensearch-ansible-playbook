@@ -11,6 +11,7 @@ os_conf_dir: /usr/share/opensearch-dashboards/config
 os_plugin_bin_path: /usr/share/opensearch-dashboards/bin/opensearch-dashboards-plugin
 
 os_api_port: 9200
+dash_api_port: 5601
 os_nodes_dashboards: |-
         {% for item in groups['os-cluster'] -%}
           https://{{ hostvars[item]['ip'] }}:{{ os_api_port }}{% if not loop.last %}","{% endif %}

@@ -61,7 +61,7 @@ copy_custom_security_configs: true
 # To override demo configurations, you can use your own configuration files.
 # Place them in the "files" directory. Specify the path to the files
 custom_security_plugin_configs:
-  - files/tenants.yml
+#  - files/tenants.yml
   - files/roles.yml
   - files/roles_mapping.yml
   - files/internal_users.yml
@@ -106,4 +106,10 @@ ldap:
   bind_password: Password123! #null
   role_query: CN=Users,DC=ak,DC=lan #'ou=groups,dc=example,dc=com'
   user_query: CN=Users,DC=ak,DC=lan #'ou=people,dc=example,dc=com'
+  #resolve_nested_roles: false
   verify_hostnames: false
+
+
+data:
+  path: /netshare/accusiem/data/
+  backup: /netshare/accusiem/backup/

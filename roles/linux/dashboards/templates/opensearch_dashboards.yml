@@ -1,4 +1,4 @@
-server.port: 5601
+server.port: {{ dash_api_port }}
 server.host: "{{ hostvars[inventory_hostname]['ip'] }}"
 opensearch.hosts: ["{{ os_nodes_dashboards }}"]
 opensearch.ssl.verificationMode: none

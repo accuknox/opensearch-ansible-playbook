@@ -13,3 +13,6 @@ discovery.seed_hosts: ["{{ os_nodes }}"]
 cluster.initial_master_nodes: ["{{ os_master_nodes }}"]
 
 node.roles: [{{ hostvars[inventory_hostname]['roles'] }}]
+
+path.data: "{{ os_data_path }}"
+path.repo: [ "{{ data.backup }}" ]

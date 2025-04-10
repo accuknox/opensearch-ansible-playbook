@@ -22,7 +22,7 @@ all_access:
   backend_roles:
   - "admin"
   - "opensearch_admin"
-  - "os-access"
+  - "ak-accusiem-access"
   description: "Maps admin to all_access"
 # ----------------------------------------------------
 indexes_full_access:
@@ -42,19 +42,19 @@ readall:
   backend_roles:
   - "opensearch_index_read_all"
 # ----------------------------------------------------
-indexes_security_search_full_access:
-  reserved: true
-  backend_roles:
-  - "opensearch_index_read_all"
-  - "opensearch_index_read_security"
-  description: "Maps users to indexes_security_search_full_access"
-# ----------------------------------------------------
-indexes_web_search_full_access:
-  reserved: true
-  backend_roles:
-  - "opensearch_index_read_all"
-  - "opensearch_index_read_web"
-  description: "Maps users to indexes_web_search_full_access"
+# indexes_security_search_full_access:
+#   reserved: true
+#   backend_roles:
+#   - "opensearch_index_read_all"
+#   - "opensearch_index_read_security"
+#   description: "Maps users to indexes_security_search_full_access"
+# # ----------------------------------------------------
+# indexes_web_search_full_access:
+#   reserved: true
+#   backend_roles:
+#   - "opensearch_index_read_all"
+#   - "opensearch_index_read_web"
+#   description: "Maps users to indexes_web_search_full_access"
 
 
 

@@ -32,3 +32,21 @@
 - name: Show all the installed dashboards plugins
   ansible.builtin.debug:
     msg: "{{ list_plugins.stdout }}"
+
+- name: Disable dashboard plugins
+  ansible.builtin.command: "sudo -u {{ os_dashboards_user }} {{ os_plugin_bin_path }} remove {{ item }}"
+  when: item  in list_plugins.stdout
+  loop:
+    - anomalyDetectionDashboards
+    - assistantDashboards
+    - customImportMapDashboards
+    - ganttChartDashboards
+    - mlCommonsDashboards
+    - queryWorkbenchDashboards
+    - searchRelevanceDashboards
+    - observabilityDashboards
+
+- name: Make sure opensearch dashboards is restarted
+  ansible.builtin.service:
+    name: dashboards
+    state: restarted
