@@ -17,12 +17,6 @@
     state: directory
   register: remote_configuration
 
-- name: Security Plugin configuration | Copy LDAP certificate
-  ansible.builtin.copy:
-    src: "{{ ldap.tls.ca_cert_path }}"
-    dest: "{{ os_sec_plugin_ldap_cert }}"
-    mode: '0400'
-
 - name: Security Plugin configuration | Create local temporary directory for certificates generation
   local_action:
     module: file

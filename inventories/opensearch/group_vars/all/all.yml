@@ -95,7 +95,7 @@ iac_enable: true
 
 
 ldap:
-  enabled: true
+  enabled: false
   hosts:
   - "dc01.ak.lan:636"
   tls:
